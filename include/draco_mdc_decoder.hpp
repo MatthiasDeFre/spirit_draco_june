@@ -24,7 +24,7 @@ class DracoMDCDecoder {
         }
         DecodedPointCloud* decode_pc(char *encoded_data, uint64_t size);
         unsigned int get_decoded_size() { return decoded_size; };
-        uint32_t get_n_points() {return pc->n_points;}; 
+        uint32_t get_n_points() {return pc != nullptr ? pc->n_points : 0;}; 
 	    float* get_point_array() {return pc->points;};
 	    uint8_t* get_color_array() {return pc->colors;};
     private:

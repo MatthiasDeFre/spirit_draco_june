@@ -2,7 +2,8 @@
 #include <draco/point_cloud/point_cloud.h>
 #include <draco/point_cloud/point_cloud_builder.h>
 #include <draco/compression/encode.h>
-void DracoMDCEncoder::encode_pc(PointCloud *pc)
+#include "description.h"
+void DracoMDCEncoder::encode_pc(Description *pc)
 {
     draco::PointCloudBuilder builder;
     builder.Start(pc->n_points);

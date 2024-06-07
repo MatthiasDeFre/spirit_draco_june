@@ -1,8 +1,10 @@
 #include "draco_mdc_encoder.hpp"
 #include "draco_mdc_decoder.hpp"
+#include "encoding_queue.hpp"
 #include "pch.h"
 #include "framework.h"
 #include "log.h"
+
 #include "plugin.h"
 
 #include <chrono>
@@ -31,7 +33,7 @@ mutex m_logging;
 mutex m_capturing;
 std::condition_variable cv_capture;
 bool capture_done = false;
-
+EncodingQueue* enc_queue;
 
 // TODO make objects
 // Realsense2 stuff
@@ -44,6 +46,8 @@ enum LOG_LEVEL : int {
 	Verbose = 1,
 	Debug = 2
 };
+
+
 
 
 /*
@@ -95,7 +99,11 @@ void set_logging(char* log_directory, int _log_level) {
 	Log::log("set_logging: Log level set to " + to_string(log_level), LogColor::Orange);
 }
 
-
+int initialize() {
+	custom_log("initialize: inting", Default, LogColor::Orange);
+	enc_queue = new EncodingQueue(2);
+	initialized = true;
+}
 /*
 	This function is used to clean up threading and reset the required variables. It is called once per session from
 	within Unity.
@@ -118,8 +126,8 @@ void clean_up() {
 		if (worker.joinable())
 			worker.join();
 		// TODO Cleanup Realsense2
-	
-		
+		delete enc_queue;
+		enc_queue = nullptr;
 
 		// Reset the initialized flag
 		initialized = false;
@@ -131,11 +139,22 @@ void clean_up() {
 	}
 }
 
-DracoMDCEncoder* encode_pc(PointCloud* pc) {
-	// TODO Subsample
-	DracoMDCEncoder* enc = new DracoMDCEncoder();
-	enc->encode_pc(pc);
-	return enc;
+uint32_t encode_pc(PointCloud* pc) {
+	// TODO
+	//  Check number of active frames in queue
+	//	If more than X = dont enter in queue and wait for place to become frame 
+	//			* Set current_waiter PointCloud* to pc
+	//			* When current_waiter is set = alert previous current_waiter that he can free himself
+	//			* Use same condition variable?
+	//					* notify_all probably
+	//			* Set current_waiter = nullptr when going into real queue
+	//  Subsample into three layers
+	//			* Make job for each and insert into pool
+	//  If job ready => callback to send to SFU
+	//  All jobs ready => remove frame from queue and signal
+
+	enc_queue->enqueue_pc(pc);
+	return 0;
 }
 uint32_t get_encoded_size(DracoMDCEncoder* enc) {
 	return enc != nullptr ? enc->get_encoded_size() : 0;
@@ -168,5 +187,11 @@ void free_encoder(DracoMDCEncoder* enc) {
 void free_decoder(DracoMDCDecoder* dec) {
 	if(dec != nullptr) {
 		delete dec;
+	}
+}
+
+void free_description(Description* dsc) {
+	if(dsc != nullptr) {
+		delete dsc;
 	}
 }

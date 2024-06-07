@@ -8,9 +8,10 @@
 // All exported functions should be declared here
 extern "C"
 {
+	DLLExport int initialize();
 	DLLExport void set_logging(char* log_directory, int _log_level);
 	DLLExport void clean_up();
-	DLLExport DracoMDCEncoder* encode_pc(PointCloud* pc);
+	DLLExport uint32_t encode_pc(PointCloud* pc);
 	DLLExport uint32_t get_encoded_size(DracoMDCEncoder* enc);
 	DLLExport char* get_raw_data(DracoMDCEncoder* enc);
 	DLLExport DracoMDCDecoder* decode_pc(char* data, uint32_t size);
@@ -19,4 +20,7 @@ extern "C"
 	DLLExport uint8_t* get_color_array(DracoMDCDecoder* dec);
 	DLLExport void free_encoder(DracoMDCEncoder* enc);
 	DLLExport void free_decoder(DracoMDCDecoder* dec);
+	DLLExport void free_description(Description* dsc);
+
+	
 }

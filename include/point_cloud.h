@@ -7,6 +7,7 @@ struct Color {
     uint8_t r, g, b;
 };
 struct PointCloud {
+    unsigned int frame_nr;
     unsigned int n_points;
     Vertex* coords;
     Color* colors;
